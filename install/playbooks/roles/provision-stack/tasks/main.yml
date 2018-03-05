@@ -1,0 +1,25 @@
+- name: get the username running the deploy
+  local_action: command whoami
+  register: username_on_the_host
+- name: "LAUNCH EC2 TEMPLATE | Provision EC2 : {{ stack_instance }}-cloudformation"
+  cloudformation:
+    stack_name: "{{ stack_name }}"
+    state: "present"
+    region: "us-east-1"
+    disable_rollback: false
+    template: "roles/provision-stack/cloudformation-templates/template.yml"
+    template_parameters:
+      EC2NamePrimary: "{{ stack_instance }}Primary"
+      KeyPairName: "{{ key_pair_name }}"
+      Ec2InstanceType: "{{ instance_type }}"
+      Ec2AmiId: "{{ ami_id }}"
+      StackTag: "{{ username_on_the_host }}"
+    tags:
+      Stack: "{{ stack_instance }}-cloudformation"
+
+- name: "LAUNCH EC2 TEMPLATE | Retrieve the stack's information"
+  cloudformation_facts:
+    stack_name: "{{ stack_instance }}-cloudformation"
+    all_facts: true
+    region: "us-east-1"
+  register: stack

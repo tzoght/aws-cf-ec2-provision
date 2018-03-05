@@ -1,0 +1,4 @@
+_venv_deploy
+.idea
+*/*.retry
+.DS_Store

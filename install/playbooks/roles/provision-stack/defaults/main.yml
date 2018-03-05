@@ -1,0 +1,8 @@
+target_working_dir: ../temp
+target_test_common_dir: ../../tests/common
+stack_instance: aws-cf-spring-boot-deploy
+stack_name: "{{ stack_instance }}-cloudformation"
+key_pair_name: secret
+instance_type: t2.micro
+ami_id: ami-66506c1c
+

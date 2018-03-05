@@ -1,0 +1,8 @@
+- name: get the username running the deploy
+  local_action: command whoami
+  register: username_on_the_host
+- name: "DELETE STACK : {{ stack_instance }}-cloudformation"
+  cloudformation:
+    stack_name: "{{ stack_name }}"
+    state: absent
+  failed_when: false

@@ -1,0 +1,6 @@
+target_working_dir: ../temp
+target_test_common_dir: ../../tests/common
+stack_instance: aws-cf-spring-boot-deploy
+stack_name: "{{ stack_instance }}-cloudformation"
+
+

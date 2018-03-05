@@ -1,0 +1,4 @@
+- name: Create single EC2 with public access
+  hosts: localhost
+  roles:
+    - provision-stack

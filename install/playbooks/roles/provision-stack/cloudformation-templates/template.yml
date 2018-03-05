@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  StackTag:
+    Default: gaga
+    Type: String
+    Description: Tag all Assets
+  EC2NamePrimary:
+    Default: primaryEc2
+    Type: String
+    Description: The instance name of the primary EC2 VMR
+  KeyPairName:
+    Default: secret
+    Description: >-
+      Name of an existing EC2 key pair within the AWS region; all instances will
+      launch with this key pair
+    Type: 'AWS::EC2::KeyPair::KeyName'
+  Ec2InstanceType:
+    AllowedValues:
+      - t2.micro
+      - t2.medium
+      - t2.large
+      - t2.xlarge
+      - m3.large
+      - m3.xlarge
+      - m4.large
+      - m4.xlarge
+      - c4.xlarge
+    ConstraintDescription: Must be a valid EC2 instance type.
+    Default: t2.micro
+    Description: Instance Type for Solace Router and Monitor nodes.
+    Type: String
+  Ec2AmiId:
+    Description: The AMI Id for the ELB Test
+    Type: String
+    Default: ami-772aa961
+
+Resources:
+  Vpc:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.0.0.0/24
+      Tags:
+      - Key: Name
+        Value: !Ref StackTag
+
+  Subnet:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: us-east-1a
+      MapPublicIpOnLaunch: true
+
+  SecGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref Vpc
+      GroupDescription: Security Group
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: -1
+          IpProtocol: -1
+          ToPort: -1
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: -1
+          IpProtocol: -1
+          ToPort: -1
+
+  RouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref Vpc
+
+  IGw:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties: {}
+
+  GwAttachment:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      InternetGatewayId: !Ref IGw
+      VpcId: !Ref Vpc
+
+  Route:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGw
+      RouteTableId: !Ref RouteTable
+    DependsOn:
+      -  RouteTable
+      -  GwAttachment
+
+  PrimarySubnetAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref Subnet
+    DependsOn:
+      -  Route
+      -  Subnet
+
+
+  EC2Primary:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: !Ref Ec2AmiId
+      InstanceType: !Ref Ec2InstanceType
+      KeyName: !Ref KeyPairName
+      SubnetId: !Ref Subnet
+      SecurityGroupIds:
+      - !Ref SecGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 8
+            VolumeType: gp2
+            DeleteOnTermination: 'true'
+      Tags:
+        - Key: Name
+          Value: !Ref EC2NamePrimary
+Outputs:
+  PrimaryEc2PublicIp:
+    Description: Public IP of Primary VMR instance
+    Value: !GetAtt EC2Primary.PublicIp
+

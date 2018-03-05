@@ -1,0 +1,5 @@
+primary ansible_ssh_host={{ _primary_ec2_ip }} ansible_ssh_user=centos ansible_ssh_private_key_file={{ _maas_pem_file }}
+
+[elb-test-instances]
+primary
+
