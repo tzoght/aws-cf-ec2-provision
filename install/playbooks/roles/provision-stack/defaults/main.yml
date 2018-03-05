@@ -1,6 +1,6 @@
 target_working_dir: ../temp
 target_test_common_dir: ../../tests/common
-stack_instance: aws-cf-spring-boot-deploy
+stack_instance: aws-cf-ec2-provision
 stack_name: "{{ stack_instance }}-cloudformation"
 key_pair_name: secret
 instance_type: t2.micro
