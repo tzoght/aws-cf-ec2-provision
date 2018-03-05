@@ -21,7 +21,7 @@ aws_secret_access_key=<Your secret access key>
 To Deploy the Stack:
 
 ```
-$ provision-stack.sh
+$ provision-stack.sh  <key pair name>
 ```
 
 To Delete the Stack:
